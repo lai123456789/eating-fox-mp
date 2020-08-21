@@ -1,0 +1,260 @@
+<template>
+  <view class="cart-ctner container-same">
+      <view class="cart-con-outer">
+        <view class="cart-goods-outer">
+          <view class="cart-goods-has">
+            <view class="cat-item-ctner" wx:for="{{rowsArr}}" wx:for-item="item" @tap="toggleCheckA({{index}},{{item.check}})">
+              <view class='cat-l' >
+                <image wx:if="{{item.check}}" src='/images/selected.png' />
+                <image wx:else src='/images/uncheck.png' />
+              </view>
+              <view class='cat-m'>
+                <image src='{{item.goodsIco}}' />
+              </view>
+              <view class="cat-m-t">
+                <view class='goods-name'>{{item.goodsName}}</view>
+                <view class='goods-pri'>
+                  <text>归还日期2020-01-14</text>
+                </view>
+              </view>
+            </view>
+
+          </view>
+          <view class="cart-goods-no" wx:if='{{rowsArr.length < 1}}'>
+            <image src='/images/shopping.png'></image>
+            <view>空空如也 马上添加</view>
+          </view>
+        </view>
+      </view>
+    <view class="cart-top">
+      <block wx:if="{{titleIndex == 1}}">
+        <view>买断图书，不能申请售后、换货！</view>
+      </block>
+      <block wx:if="{{titleIndex == 3}}">
+        <view>1、每一本只能续借一次</view>
+        <view>2、续借周期延长30天</view>
+      </block>
+    </view>
+    <view class='cat-bottom'>
+        <view class='check-all' @tap='checkAll'>
+          <image wx:if= "{{isAllCkeck}}" src='/images/selected.png' />
+          <image wx:else= "{{isAllCkeck}}" src='/images/uncheck.png' />
+          <text>全选</text>
+        </view>
+        <view class='price-total'>
+          <text>已选：{{totalLength}}</text>
+        </view>
+      <view class='icx-btn-colorBg-whiteText' @tap='toSureOrderA' wx:if="{{titleIndex == 1}}">立即买书</view>
+      <view class='icx-btn-colorBg-whiteText' @tap='btnClick' wx:if="{{titleIndex == 2}}">立即还书</view>
+      <view class='icx-btn-colorBg-whiteText' @tap='redecorate' wx:if="{{titleIndex == 3}}">续借</view>
+      </view>
+  </view>
+  <van-popup
+    show="{{ show }}" closeable round position="bottom" custom-style="height: 25%" bind:close="onClose">
+    <view class="popup-content">
+      <view>您还不能借阅，赶紧来开通会员吧！</view>
+      <view class="icx-btn-colorBg-whiteText" @tap="openMember">开通会员</view>
+    </view>
+  </van-popup>
+</template>
+
+<script>
+import wepy from 'wepy';
+import {
+  apiCartFindPageF,
+  apiChangeQuantityF,
+  apiCartDeleteF, apiInfoF
+} from '../../../services/cart';
+import {
+  apiCreateOrderF
+} from '../../../services/mine'
+
+import { apiGoodsLikePageF } from '../../../services/index/index'
+import miniPro from '@/utils/wepy-pro.js';
+
+export default class Index extends wepy.page {
+  config = {
+    navigationBarTitleText: '书架操作',
+    "usingComponents": {
+      "van-popup": "/components/vant/popup/index",
+    }
+  };
+  components = {
+  };
+
+  mixins = [];
+
+  data = {
+    titleIndex:null,
+    show:false,
+    userLevel:"",
+    pageNum: 0,
+    rowsArr: [],
+    changeQuantity: {
+      id: '',
+      type: '',
+      current: -1
+    },
+    isAllCkeck: false,
+    totalMoney: 0,
+    totalLength:0,
+    createData: {
+      // channelId: '0', // 需求确认
+      orderDetailBoList: []
+    },
+    delGoosId: '',
+    pageParamsLike: {
+      page: 0,
+      limit: 50
+    },
+  };
+
+  methods = {
+    toggleCheckA(e,check){
+      this.rowsArr[e].check = !check
+      this.$apply()
+    },
+    openMember(){
+      wepy.navigateTo({ url: `/pages/packageMine/joinMembers/index`});
+    },
+    onClose(){
+      this.show = false
+    },
+    redecorate(){ //续借
+      let ids = [];
+      for(let x in this.rowsArr){
+        if(this.rowsArr[x].check){
+          ids.push(this.rowsArr[x].id);
+        }
+      }
+      if (ids.length == 0){
+        miniPro.showToast("请先选择图书！")
+        return
+      }
+      let _self = this
+      let num = ids.length
+      miniPro.showConfirm({
+        title: '提示',
+        content: `确定续借这${num}本图书吗？`,
+        callback(flag) {
+          if (!flag) return  //点击取消按钮操作  弹框消失
+          console.log("续借成功")  //点击确定按钮操作
+        }
+      })
+    },
+    toSureOrderA() {  //买书
+      this.apiCreateOrderA(this.apiCreateOrderA.bind(this))
+    },
+    checkAll() {
+      this.rowsArr.forEach(val => val.check = !this.isAllCkeck)
+    },
+    toGoodsDetail(item) {
+      miniPro.toGoodsDetail(item.id, item.groupPurchase)
+    }
+  };
+
+  apiCreateOrderA(fun) {
+    let ids = [];
+    for(let x in this.rowsArr){
+      if(this.rowsArr[x].check){
+        ids.push(this.rowsArr[x].id);
+      }
+    }
+    if (ids.length == 0){
+      miniPro.showToast("请先选择图书！")
+      return
+    }
+    /* prepareType 参数备注：
+      *
+      * */
+    wepy.navigateTo({ url: `/pages/packageMine/sureOrder/index?prepareType=1&cartIds=${ids}`});
+  }
+  apiCartFindPageA(fun) {
+    let _pageNum = this.pageNum
+    apiCartFindPageF({
+      page: _pageNum
+    }, fun).then(msg => {
+      let { rows } = msg
+      this.rowsArr = rows.map((val) => {
+        val.check = false
+        return val
+      })
+      this.$apply()
+    }).catch(() => { })
+  }
+  apiChangeQuantityA(fun) {
+    apiChangeQuantityF({
+      id: this.changeQuantity.id,
+      type: this.changeQuantity.type
+    }, fun).then(msg => {
+      this.rowsArr[this.changeQuantity.current].quantity = msg.quantity
+      this.$apply()
+    }).catch(() => { })
+  }
+  watch = {
+    rowsArr (newValue) {
+      let _newValue = newValue
+      this.isAllCkeck = _newValue.every(val => {
+        return val.check
+      })
+      let _createData = []
+      _newValue.forEach((val) => {
+        if (val.check) {
+            _createData.push({
+            cartId: val.id,
+            goodsId: val.goodsId,
+            specificationId: val.specificationId,
+            colorId: val.colorId,
+            goodsNumber: val.quantity
+          })
+        }
+      });
+
+      this.totalLength = _createData.length
+      this.createData.orderDetailBoList = _createData
+      console.log(_createData.length)
+    }
+  }
+  events = {
+
+    'num-change-event': (index, type) => {
+      this.changeQuantity.id = this.rowsArr[index].id
+      this.changeQuantity.type = type
+      this.changeQuantity.current = index
+      this.apiChangeQuantityA(this.apiChangeQuantityA.bind(this))
+      this.$apply()
+    },
+  };
+  apiGetInfoFA(fun) { //获取用户信息
+    let _self = this
+    apiInfoF(fun).then(msg => {
+      _self.userLevel = msg.userLevel
+      _self.$apply();
+    }).catch(() => { });
+  }
+  onLoad(option){
+    let index  = option.param
+    this.titleIndex = index
+    let title
+    if(index == 1){
+      title = "买书"
+    }else if(index == 2){
+      title = "还书"
+    }else{
+      title = "续借"
+    }
+    wx.setNavigationBarTitle({
+      title: `${title}`
+    })
+  }
+  async onShow() {
+
+    this.apiGetInfoFA(this.apiGetInfoFA.bind(this))
+    this.apiCartFindPageA(this.apiCartFindPageA.bind(this))
+    this.apiGoodsLikePageFA(this.apiGoodsLikePageFA.bind(this))
+  }
+}
+</script>
+<style lang="scss">
+@import './index.scss';
+</style>

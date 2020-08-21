@@ -1,0 +1,98 @@
+<template>
+  <view class="withdrawal-record-ctner">
+    <view class="top">
+      <view @tap="choic(1)" class="{{currentIndex == 1?'active':''}}">狐币获取</view>
+      <view @tap="choic(2)" class="{{currentIndex == 2?'active':''}}">狐币支出</view>
+    </view>
+    <scroll-view class="scroll-view" scroll-y="true" style="height:100%;" @scrolltolower="loadMore">
+      <view class="withdrawal-index" wx:for="{{recordList}}" wx:key="id" wx:if="{{recordList.length > 0}}">
+        <view class="withdrawal-left">
+          <view class="L2">
+            <view>签到</view>
+            <view>{{item.createTime}}</view>
+          </view>
+        </view>
+        <view class="withdrawal-right">
+          <view>+{{item.actualAmount}}</view>
+        </view>
+      </view>
+      <view  wx:if="{{recordList.length == 0}}" class="none">
+        暂无狐币记录
+      </view>
+      <view  wx:if="{{!pageParams.hasMore && recordList.length > 0}}"  class="none">
+        没有更多记录了！
+      </view>
+    </scroll-view>
+
+
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import miniPro from '@/utils/wepy-pro.js';
+import {
+  apiwithdrawRecordF //
+} from '../../../services/mine/index'
+export default class withdrawalsRecord extends wepy.page {
+  config = {
+    navigationBarTitleText: '狐币记录'
+  };
+  components = {
+  };
+  data = {
+    currentIndex:1,
+    height:wx.getSystemInfoSync().screenHeight,
+    recordList:[],
+    pageParams: {
+      offset: 0,
+      limit: 10,
+      hasMore:false,
+      page: 0,
+    },
+  };
+  methods = {
+    choic(f){
+      // if (this.currentIndex == f) return
+      this.currentIndex = f
+    },
+    loadMore() { // 加载更多
+      if (!this.pageParams.hasMore) return
+      let offset = this.pageParams.offset;
+      if(offset == 0){
+        offset = this.pageParams.limit;
+      }else{
+        offset = offset + this.pageParams.limit;
+      }
+      this.pageParams.offset = offset;
+      this.apiwithdrawRecordFA(this.apiwithdrawRecordFA.bind(this))
+    },
+  }
+  apiwithdrawRecordFA(fun) {
+    let params = {
+      limit: this.pageParams.limit,
+      offset: this.pageParams.offset
+    }
+    apiwithdrawRecordF(params, fun).then((result) => {
+      let { rows, last } = result
+      this.pageParams.hasMore = !last
+      // this.recordList = this.recordList.concat(rows)
+      this.recordList = [
+        {createTime:"2020-06-25",actualAmount:"69",desc:"描述"},
+        {createTime:"2020-06-25",actualAmount:"69",desc:"描述"},
+        {createTime:"2020-06-25",actualAmount:"69",desc:"描述"},
+        {createTime:"2020-06-25",actualAmount:"69",desc:"描述"},
+      ]
+      this.$apply()
+    }).catch(() => {
+      miniPro.showToast('狐币失败')
+    })
+  }
+  onLoad(option) {
+    this.apiwithdrawRecordFA(this.apiwithdrawRecordFA.bind(this))
+  }
+}
+</script>
+<style lang="scss" scoped>
+@import './index'
+</style>

@@ -1,0 +1,45 @@
+@import '../../../common/css/rpx.scss';
+@import '../../../common/css/const.scss';
+@import '../../../common/css/mixin.scss';
+page{
+}
+.msg-ctner{
+  width: 100%;
+  .msg-content{
+    display: flex;
+    justify-content: center;
+    margin: rpx(40);
+    .content{
+      view:nth-of-type(1){
+        font-size:rpx(32);
+        font-family:PingFang SC;
+        font-weight:bold;
+        line-height:rpx(60);
+        color:$color-word-alarm;
+      }
+      view:nth-of-type(2){
+        font-size: rpx(24);
+        line-height: rpx(70);
+        color: #000000;
+      }
+      view:nth-child(n+3){
+        font-size: rpx(24);
+        line-height: rpx(40);
+        color: #000000;
+      }
+    }
+  }
+
+  .btn-bottom{
+    display: flex;
+    justify-content: space-around;
+    view{
+      font-size: rpx(28);
+      border: rpx(1) solid $color-word-alarm;
+      width: rpx(198);
+      height: rpx(64);
+      color: $color-word-alarm !important;
+      border-radius: rpx(30);
+    }
+  }
+}

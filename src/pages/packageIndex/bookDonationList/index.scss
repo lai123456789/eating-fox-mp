@@ -1,0 +1,77 @@
+@import '../../../common/css/rpx.scss';
+@import '../../../common/css/const.scss';
+@import '../../../common/css/mixin.scss';
+page{
+    height: 100%;
+}
+
+.withdrawal-record-ctner {
+  height: 100%;
+  background: #EEE;
+  .top{
+    text-align: center;
+    width: 100%;
+    line-height: rpx(40);
+    background: #FFE7D5;
+    color: $color-word-alarm;
+  }
+  scroll-view {
+    .withdrawal-index {
+      border-top: rpx(1) solid #EEE;
+      padding: rpx(30) rpx(48);
+      display: flex;
+      align-items: center;
+      background: #FFFFFF;
+      .withdrawal-left {
+        display: flex;
+        align-items: center;
+
+        .L1 {
+          image {
+            width: rpx(92);
+            height: rpx(92);
+          }
+        }
+
+        .L2 {
+          margin-left: rpx(23);
+          view {
+            line-height: rpx(40);
+          }
+
+          view:nth-of-type(1) {
+            color: #333333;
+            font-weight: bold;
+            font-size: rpx(30);
+          }
+          view:nth-of-type(2) {
+            text{
+              color: #333333;
+              font-size: rpx(24);
+            }
+            .colorText{
+              color: $color-word-alarm;
+              font-size: rpx(28);
+            }
+          }
+        }
+      }
+      .colorActive{
+        color: $color-word-alarm !important;
+      }
+      .withdrawal-right {
+        margin-right: rpx(40);
+        margin-left: rpx(35);
+        font-size: rpx(36);
+        font-weight: bold;
+        color: #333333;
+      }
+    }
+    .none{
+      padding: rpx(20) 0;
+      border-top:rpx(1) solid #EEE;
+      text-align: center
+    }
+  }
+
+}

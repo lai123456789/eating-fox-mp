@@ -1,0 +1,105 @@
+@import '../../../common/css/rpx.scss';
+@import '../../../common/css/const.scss';
+@import '../../../common/css/mixin.scss';
+page{
+}
+.msg-ctner{
+  width: 100%;
+  height: 100%;
+  background: #F9F9F9;
+  .msg-top{
+    width: 100%;
+    height: rpx(220);
+    background: $color-word-alarm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .msg-1{
+      .one{
+        display: flex;
+        align-items: center;
+
+        image{
+          width: rpx(68);
+          height: rpx(68);
+          margin-right: rpx(15);
+        }
+        text{
+          font:{
+            size: rpx(32);
+            weight: bold;
+          }
+          color: #FFFFFF;
+        }
+      }
+      .two{
+        line-height: rpx(60);
+        font-size: rpx(22);
+        color: #FFFFFF;
+      }
+    }
+  }
+  .msg-text{
+    background: #FFFFFF;
+    margin: rpx(15) 0;
+    padding: rpx(40);
+    view{
+      font-size:rpx(28);
+      font-family:PingFang SC;
+      font-weight:500;
+      line-height:rpx(45);
+      color:rgba(51,51,51,1);
+    }
+  }
+  .icx-btn-whiteBg-colorText{
+    width: rpx(160);
+    height: rpx(50);
+    margin: 0 auto;
+    border-radius: rpx(30);
+    border: rpx(1) solid #666666;
+    color: #666666;
+  }
+}
+.popup-content{
+  width: 100%;
+  text-align: center;
+  .p1{
+    font-size:rpx(30);
+    font-family:PingFang SC;
+    font-weight:400;
+    line-height:rpx(33);
+    color:rgba(0,0,0,1);
+    margin: rpx(50) 0;
+  }
+  .List{
+    .item{
+      margin: rpx(30);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      view{
+        font-size: rpx(26);
+        color: #333333;
+        line-height: rpx(40);
+      }
+      image{
+        width: rpx(30);
+        height: rpx(30);
+      }
+    }
+  }
+  .btn{
+    display: flex;
+    justify-content: space-around;
+    margin: rpx(40) 0;
+    view{
+      width: rpx(230);
+      height: rpx(56);
+      border: rpx(1) solid $color-word-alarm;
+      color: $color-word-alarm;
+      border-radius: rpx(30);
+    }
+  }
+
+}
+

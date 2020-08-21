@@ -1,0 +1,103 @@
+<template>
+  <view class="withdrawal-record-ctner">
+    <view class="top">你已借阅10本，目前排名第10，节省3455.11</view>
+    <scroll-view class="scroll-view" scroll-y="true" style="height:100%;" @scrolltolower="loadMore">
+      <view class="withdrawal-index" wx:for="{{recordList}}" wx:key="id" wx:if="{{recordList.length > 0}}">
+        <view class="withdrawal-right {{index < 3 ? 'colorActive':''}}">
+          {{index+1}}
+        </view>
+        <view class="withdrawal-left">
+          <view class="L1"><image src="https://zcmall-1259120104.cos.ap-guangzhou.myqcloud.com/ZC_mp_sources/images/20200514145034.png"></image></view>
+          <view class="L2">
+            <view>{{item.name}}</view>
+            <view>
+              <text>已借</text>
+              <text class="colorText">{{item.num}}</text>
+              <text>本，节省</text>
+              <text class="colorText">{{item.saveMoney}}</text>
+              <text>元</text>
+            </view>
+          </view>
+        </view>
+
+      </view>
+      <view  wx:if="{{recordList.length == 0}}" class="none">
+        暂无提现记录
+      </view>
+      <view  wx:if="{{!pageParams.hasMore && recordList.length > 0}}"  class="none">
+        没有更多记录了！
+      </view>
+    </scroll-view>
+
+
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import miniPro from '@/utils/wepy-pro.js';
+import {
+  apiwithdrawRecordF //
+} from '../../../services/mine/index'
+export default class borrowList extends wepy.page {
+  config = {
+    navigationBarTitleText: '借阅榜'
+  };
+  components = {
+  };
+  data = {
+    height:wx.getSystemInfoSync().screenHeight,
+    recordList:[],
+    pageParams: {
+      offset: 0,
+      limit: 10,
+      hasMore:false,
+      page: 0,
+    },
+  };
+  methods = {
+    loadMore() { // 加载更多
+      if (!this.pageParams.hasMore) return
+      let offset = this.pageParams.offset;
+      if(offset == 0){
+        offset = this.pageParams.limit;
+      }else{
+        offset = offset + this.pageParams.limit;
+      }
+      this.pageParams.offset = offset;
+      this.apiwithdrawRecordFA(this.apiwithdrawRecordFA.bind(this))
+    },
+  }
+  apiwithdrawRecordFA(fun) {
+    let params = {
+      limit: this.pageParams.limit,
+      offset: this.pageParams.offset
+    }
+    apiwithdrawRecordF(params, fun).then((result) => {
+      let { rows, last } = result
+      this.pageParams.hasMore = !last
+      // this.recordList = this.recordList.concat(rows)
+      // this.recordList.forEach((item,index) => {
+      //   item.actualAmount = (item.actualAmount/100).toFixed(2)
+      // })
+      this.recordList = [
+        { createTime:"2020-3-6 8:00:00",name:"童话",num:5,saveMoney:265.33},
+        { createTime:"2020-3-6 8:00:00",name:"狐狸",num:7,saveMoney:159.43},
+        { createTime:"2020-3-6 8:00:00",name:"狐狸",num:7,saveMoney:159.43},
+        { createTime:"2020-3-6 8:00:00",name:"狐狸",num:7,saveMoney:159.00},
+        { createTime:"2020-3-6 8:00:00",name:"狐狸",num:7,saveMoney:159.43},
+      ]
+      this.$apply()
+    }).catch(() => {
+      miniPro.showToast('提现失败')
+    })
+  }
+  onLoad(option) {
+
+    this.apiwithdrawRecordFA(this.apiwithdrawRecordFA.bind(this))
+  }
+}
+</script>
+<style lang="scss" scoped>
+@import './index'
+</style>

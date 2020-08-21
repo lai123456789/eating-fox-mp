@@ -1,0 +1,240 @@
+
+<template>
+  <view class="search-ctner container-same">
+      <view class="search-top-outer">
+        <view class="ix-input-wrap">
+          <view class="input-search">
+            <image src='../../../images/nav_button_search.png' />
+          </view>
+          <input  confirm-type='search' bindconfirm='confirmTap'  bindfocus="focusTap"
+                  @input='bindInput' maxlength='200' class='icx-input' placeholder-class='icx-placeholder' placeholder="请输入书名/作者/关键字" />
+          <view class="input-msg" @tap="toSearchA">搜索</view>
+        </view>
+        <view class="search-hot" wx:if="{{!showText}}" > <!---->
+          <view class="s1">热门搜索</view>
+          <view class="s2">
+            <block wx:for="{{labelList}}" wx:key="index">
+              <view @tap="labelSearchA({{item}})">{{item.labelText}}</view>
+            </block>
+          </view>
+        </view>
+
+      <view class="search-rank-index">
+        <view class="search-rank-outer" wx:if="{{showText}}"> <!---->
+          <view wx:for="{{buttonList}}" @tap='clickButton({{item}},{{index}})' wx:key="{{index}}"
+                class="rank-same {{buttonCurrentIndex == index ? 'active' : ''}}">
+            {{item.buttonText}}
+          </view>
+        </view>
+        <view class="search-no-text"  wx:if="{{pageList.length == 0 && pageList && showText}}">
+          <image src="../../../images/warn.png"></image>
+          <text>抱歉，没找到相关书籍，为您推荐以下相关书籍</text>
+        </view>
+      </view>
+
+      </view>
+
+     <view class="ix-goods-wrap" wx:if="{{showText}}"> <!---->
+       <scroll-view scroll-y="true" style="height: 100%;" @scrolltolower="loadMore">
+<!--            <repeat for="{{pageList}}" key="index" index="index" item="item">-->
+<!--                <SearchItem :current="index" :item="item"></SearchItem>-->
+<!--            </repeat>-->
+         <view class="cart-like">
+           <view class='cat-container' wx:if="{{pageList.length > 0}}">
+             <view @tap="toGoodsDetail({{item}})" class="cat-like-item"
+                   wx:for="{{pageList}}" wx:key="index">
+               <image src="{{item.goodsIco}}"></image>
+               <view class="cart-l-des">{{item.goodsName}}</view>
+               <view class="cart-l-label"> <!--￥{{item.price}}-->
+                 <view class="icx-btn-colorBg-whiteText">0-5岁</view>
+                 <view class="icx-btn-colorBg-whiteText">教育</view>
+                 <view class="icx-btn-colorBg-whiteText">中文</view>
+               </view>
+             </view>
+           </view>
+         </view>
+
+       </scroll-view>
+
+     </view>
+
+
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import Auth from '../../../common/js/authProcess.js';
+import {
+  apiGoodsListF,
+  apiGetGoodsDetailsF
+} from '../../../services/index';
+import {
+  apiCollectDeleteF,
+  apiCollectSaveF
+} from '../../../services/mine';
+
+import miniPro from '@/utils/wepy-pro.js';
+import { showAlertTips } from '@/utils/feature.js';
+import SearchItem from '@/components/searchItem/index';
+
+export default class Index extends wepy.page {
+  config = {
+    navigationBarTitleText: '商品搜索'
+  };
+  components = {
+    SearchItem: SearchItem
+  };
+
+  mixins = [];
+
+  data = {
+    showText:false,
+    pageList: [],
+    starFData: {
+      goodsId: '',
+      current: ''
+    },
+    pageParams: {
+     page: 0,
+     limit: 7,
+     categoryId: '',
+     keyword: '',
+     hasMore:false,
+      goodsLabels:''
+   },
+    labelList:[
+      {labelText:"成长经历"},
+      {labelText:"童话"},
+      {labelText:"白雪公主"}
+    ],
+    buttonCurrentIndex: 0,
+    buttonList:[
+      {buttonText:"全部"},
+      {buttonText:"0-3岁"},
+      {buttonText:"3-6岁"},
+      {buttonText:"6-9岁"},
+      {buttonText:"10-15岁"}
+    ]
+  };
+
+  computed = {};
+
+  methods = {
+    clickButton(item, index){
+      // if (this.currentIndex == index) return
+      this.buttonCurrentIndex = index
+    },
+    toGoodsDetail(e){
+      miniPro.toGoodsDetail(e.id)
+    },
+    toSearchA() {
+      this.pageParams.page = 0
+      this.pageList = []
+      this.getGoodsListA(this.getGoodsListA.bind(this))
+    },
+    labelSearchA(e){
+      this.pageParams.keyword = e.labelText
+      this.pageParams.page = 0
+      this.pageList = []
+      this.getGoodsListA(this.getGoodsListA.bind(this))
+    },
+    toCloseWordA() {
+    },
+    focusTap(e){ //获取焦点
+      this.showText = false
+      this.pageParams.categoryId = ''
+      this.pageParams.goodsLabels = ''
+    },
+    confirmTap(e){ //手机键盘 输入法右下角搜索按钮
+      this.pageParams.keyword = e.detail.value
+      this.pageParams.page = 0
+      this.pageList = []
+      this.getGoodsListA(this.getGoodsListA.bind(this))
+    },
+    bindInput(e) {
+      this.showText = false
+      this.pageParams.keyword = e.detail.value
+    },
+    loadMore() { // 加载更多
+      if (!this.pageParams.hasMore) return
+      this.pageParams.page += 1
+      this.getGoodsListA(this.getGoodsListA.bind(this))
+    }
+  }
+
+  getGoodsListA(fun) {
+    this.showText = true
+    apiGoodsListF({
+      page: this.pageParams.page,
+      limit: this.pageParams.limit,
+      keyword: this.pageParams.keyword,
+      categoryId: this.pageParams.categoryId,
+      goodsLabels:this.pageParams.goodsLabels
+    }, fun).then(result => {
+      let { rows, last, pageNumber } = result
+      this.pageParams.page = pageNumber
+      this.pageParams.hasMore = !last
+      this.pageList = this.pageList.concat(rows)
+      this.$apply()
+    }).catch(err => {
+    });
+  }
+
+  apiCollectSaveA(fun) {
+    apiCollectSaveF({
+      goodsId: this.starFData.goodsId
+    }, fun).then(msg => {
+      this.pageList[this.starFData.current].collection = true
+      miniPro.showToast('收藏成功')
+      this.$apply()
+    }).catch(err => {
+      miniPro.showToast('收藏失败')
+    })
+  }
+
+  apiCollectDeleteA(fun) {
+    apiCollectDeleteF(this.starFData.goodsId, fun).then(msg => {
+      this.pageList[this.starFData.current].collection = false
+      this.$apply()
+    }).catch(err => {
+      miniPro.showToast('删除收藏失败')
+    })
+  }
+
+  events = {
+    'goods-start-event': (current, collection) => {
+      this.starFData.goodsId = this.pageList[current].id
+      this.starFData.current = current
+      this.$apply()
+      setTimeout(() => {
+        if (collection) {
+          this.apiCollectDeleteA(this.apiCollectDeleteA.bind(this))
+        } else {
+          this.apiCollectSaveA(this.apiCollectSaveA.bind(this))
+        }
+      }, 10);
+    },
+    'to-goods-event': (goodsId, groupPurchase) => {
+      let _goodsId = goodsId
+      let _group = groupPurchase
+      miniPro.toGoodsDetail(_goodsId, _group)
+    }
+  };
+
+  async onLoad(option) {
+    this.pageParams.categoryId = option.categoryId || ""
+    this.pageParams.goodsLabels = option.goodsLabels || ""
+    if(option.categoryId || option.goodsLabels){
+      this.getGoodsListA(this.getGoodsListA.bind(this))
+    }
+    this.$apply();
+  }
+  onUnload() {}
+  onHide() {}
+  async onShow() {}
+}
+</script>
+<style lang="scss">
+@import './index.scss';
+</style>

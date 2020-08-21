@@ -1,0 +1,123 @@
+@import '../../../common/css/rpx.scss';
+@import '../../../common/css/const.scss';
+@import '../../../common/css/mixin.scss';
+page{
+}
+.my-ctner{
+  margin-top: rpx(20);
+  .my-top{
+    display: flex;
+    justify-content: space-between;
+    padding: 0 rpx(30);
+    .active{
+      font-weight: bold;
+      color: $color-word-alarm;
+      border-bottom: rpx(1) solid $color-word-alarm;
+    }
+    text{
+      color: #333333;
+      line-height: rpx(50);
+      font:{
+        size: rpx(30);
+      };
+    }
+
+  }
+  .my-bar{
+    padding: 0 rpx(30);
+    margin: rpx(20) 0 0 0;
+    display: flex;
+    align-items: center;
+    background: #FFE7D5;
+    height: rpx(50);
+    width: 100%;
+    image{
+      width: rpx(24);
+      height: rpx(24);
+      margin-right: rpx(10);
+    }
+    text{
+      font-weight: 500;
+      font-size: rpx(24);
+      line-height: rpx(40);
+      color: $color-word-alarm;
+    }
+  }
+  .my-content{
+    //margin-top: rpx(-20);
+    height: rpx(760);
+    width: 100%;
+    overflow-y: scroll;
+    padding: 0 rpx(30);
+    background: #FFF;
+    border-radius: rpx(10);
+    margin-bottom: rpx(40);
+    .goods-outer {
+      display: flex;
+      align-items: center;
+      padding:rpx(10) 0 rpx(30) 0;
+      border-bottom: rpx(1) solid #D8D8D8;
+      position: relative;
+      margin-top: rpx(20);
+      .cat-m {
+        width: rpx(174);
+        height: rpx(130);
+        margin: 0 rpx(26) 0 rpx(16);
+        image{
+          width: 100%;
+          height: 100%;
+        }
+      }
+      .cat-m-t {
+        flex: 1;
+        .goods-name {
+          font-weight: bold;
+          font-size: rpx(30);
+          color: $color-word-one;
+          text-overflow: ellipsis; /*文本两行显示start 块状元素*/
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          line-clamp: 2;        /*文本两行显示ede 块状元素*/
+          -webkit-box-orient: vertical;
+          letter-spacing: rpx(3);
+          line-height: rpx(30);
+        }
+        .goods-des {
+          height: rpx(20);
+          line-height: rpx(20);
+          margin: rpx(20) 0;
+          text{
+            color: #666666;
+            font-size: rpx(22);
+
+            overflow: hidden;
+            width: rpx(400);
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+            line-height: rpx(30);
+          }
+        }
+      }
+    }
+    //.goods-outer:last-child{
+    //  border-bottom: none;
+    //}
+
+  }
+  .my-bottom{
+    width: 100%;
+    position: absolute;
+    bottom: rpx(50);
+    display: flex;
+    justify-content: space-around;
+    view{
+      width: rpx(200);
+      height: rpx(60);
+      border-radius: rpx(35);
+    }
+  }
+
+}
+

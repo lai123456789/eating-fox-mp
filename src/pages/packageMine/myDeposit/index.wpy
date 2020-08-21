@@ -1,0 +1,53 @@
+<template>
+  <view class='msg-ctner'>
+    <view class="top">
+      <view class="content">
+        <view>会员押金：¥200</view>
+        <view class="icx-btn-colorBg-whiteText" @tap="toReturn">退押金</view>
+      </view>
+    </view>
+    <view class="line"></view>
+    <view class="bottom">
+      <view class="b1">
+        <view class="b-title">我的押金</view>
+        <view class="b-text">
+          <view>1.有未归还图书时，押金暂时不可退;图书归还后，押金随时可退。</view>
+          <view>2、订阅年卡，如退还押金后，再去借阅书籍，需要去支付押金，否则无法借阅书籍</view>
+          <view>3、只支持支付宝退还</view>
+        </view>
+      </view>
+      <view class="b2">
+        <view>如遇到其他问题，请联系客服</view>
+        <view class="icx-btn-whiteBg-colorText">联系客服</view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+export default class myDeposit extends wepy.page {
+  config = {
+    // navigationBarBackgroundColor: '#09103b',
+    // navigationBarTextStyle: '#FFF',
+    navigationBarTitleText: '押金'
+  };
+  components = {
+  };
+  data = {
+    isRepair: false, // 检修
+    isBad: false
+  };
+  methods = {
+    toReturn(){
+      wepy.navigateTo({url:`/pages/packageMine/withdrawal/index`})
+    }
+  }
+  onLoad(){}
+  onShow(){}
+}
+</script>
+<style lang="scss" scoped>
+@import './index'
+</style>
+

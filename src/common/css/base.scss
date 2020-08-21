@@ -1,0 +1,14 @@
+@import './const.scss';
+page {
+  color: $color-word-one;
+  view,text,image,button, checkbox, radio, scroll-view, input, form, label, picker{ // silder,
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+  }
+  //text,button,label{
+  //  font-size: $size-one;
+  //}
+  view{
+    line-height: 1;
+  }
+}

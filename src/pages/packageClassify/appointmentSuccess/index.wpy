@@ -1,0 +1,44 @@
+<template>
+  <view class='msg-ctner'>
+      <view class="msg-content">
+        <view class="content">
+          <view>恭喜您！预约成功</view>
+          <view>请保持电话畅通，上门前会与您电话联系</view>
+          <view>预约数量: 6本</view>
+          <view>联系电话: 15220154566</view>
+          <view>上门时间：2020- 07-23</view>
+        </view>
+      </view>
+    <view class="btn-bottom">
+      <view class="icx-btn-whiteBg-colorText" @tap="goInfo">查看订单</view>
+      <view class="icx-btn-whiteBg-colorText" @tap="goIndex">返回首页</view>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+export default class appointmentSuccess extends wepy.page {
+  config = {
+    navigationBarTitleText: '预约成功'
+  };
+  components = {
+  };
+  data = {
+    isRepair: false, // 检修
+    isBad: false
+  };
+  methods = {
+    goInfo(){
+      wepy.navigateTo({url:`/pages/packageClassify/donateOrederInfo/index`})
+    },
+    goIndex(){
+      wepy.switchTab({url:`/pages/index/index`})
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+@import './index'
+</style>
+

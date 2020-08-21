@@ -1,0 +1,356 @@
+
+<template>
+  <view class="top">
+    <view class="topBg">
+      <view class="top1">
+        <view class="v-1">
+          <text>当前狐币： </text>
+          <text>{{Info.integration}}</text>
+        </view>
+        <view class="icx-btn-colorBg-whiteText" @tap="goMingxi">查看明细</view>
+      </view>
+      <view class="t2">
+        <view hover-class='icx-click-hover' @tap="SignIn">
+          点击签到
+        </view>
+      </view>
+    </view>
+    <view class="top-text">
+      <view class="top-text-1">
+        <view class="t1">已连续签到</view>
+        <view class="t2">
+          <text>{{Info.cumulativeTimes}}</text>
+          <text>天</text>
+        </view>
+      </view>
+      <view class="top-text-2">
+        <view class="text-date">
+          <view wx:for="{{dateArr}}" wx:for-item="item" wx:key="idx">
+            <block wx:if="{{!item.signed && item.isToday}}">今日</block> <!--未签到的显示 -->
+            <block wx:elif="{{item.signed && item.isToday}}">今日</block> <!--已经签到的显示 -->
+            <block wx:else>{{item.idx}}天</block>
+          </view>
+        </view>
+        <view class="text-icon">
+          <view class="line-icon" wx:for="{{IconArr}}" wx:for-item="subItem" wx:key="index">
+            <view class="line {{subItem.signed ? 'active' : ''}}"></view>
+            <!--今日之前是否签到的显示如下 -->
+            <view wx:if="{{subItem.signed}}" class="iconBg"></view>
+            <!--今日是否签到的显示如下 -->
+            <view wx:elif="{{!subItem.signed && !subItem.isToday}}" class="icon">+{{subItem.getIntegration}}</view>
+            <!--今日以后未签到的显示如下 -->
+            <view wx:elif="{{!subItem.signed && subItem.isToday}}" class="one">+{{subItem.getIntegration}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view class="recom-ctner">
+    <view class="recom-play-cheng">
+      <view class="p1">做任务赚狐币</view>
+      <view class="content-index">
+        <view class="content-1">
+          <view class="content-left">
+            <view class="left-text">
+              <view>邀请新用户</view>
+              <view>奖励{{SendPoint.shareRegister}}狐币</view>
+            </view>
+          </view>
+          <view class="content-right" @tap="goShareLink">
+            <button class="icx-btn-whiteBg-colorText">去邀请</button>
+          </view>
+        </view>
+        <view class="content-1">
+          <view class="content-left">
+            <view class="left-text">
+              <view>捐书</view>
+              <view>奖励{{SendPoint.shareRegister}}狐币</view>
+            </view>
+          </view>
+          <view class="content-right" @tap="goShareLink">
+            <button class="icx-btn-whiteBg-colorText">去捐书</button>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view style="height: 25rpx;width: 100%;background: #F9F9F9"></view>
+  <view class="recom-ctner">
+    <view class='integral-ctner'>
+      <view class="integral-top-title">狐币说明</view>
+      <view class="integral-top-content">
+        <view>1、狐币的有效期365天，从获取时算起</view>
+        <view>2、狐币可以通过、邀请新用户、捐书、签到、赠送、分享来获取</view>
+        <view>3、分享获取狐币，每天限制10次，每次获取5狐币</view>
+      </view>
+    </view>
+  </view>
+  <view style="height: 25rpx;width: 100%;background: #F9F9F9"></view>
+  <view class="recom-ctner">
+    <view class="pointsCollectionRecord">
+      <view class="points-title">狐币明细</view>
+      <view class="points-index">
+        <scroll-view class="scroll-view" scroll-y="true" style="height: {{height+500}}rpx;" @scrolltolower="loadMore" >
+          <view class="points-item" wx:for="{{pointsArr}}" wx:key="idx" wx:if="{{pointsArr.length > 0}}">
+            <view class="item-1">
+              <view>{{item.remark}}</view>
+              <view>{{item.createTime}}</view>
+            </view>
+            <view class="item-2">{{item.integration}}</view>
+          </view>
+          <view  wx:if="{{!pageParams.hasMore && pointsArr.length > 0}}" style="padding: 20rpx 0;border-top:1rpx solid #EEE;text-align: center">
+            没有更多记录了！
+          </view>
+          <view wx:if="{{pointsArr.length == 0}}" style="padding: 20rpx 0;border-top:1rpx solid #EEE;text-align: center">
+            暂无狐币记录
+          </view>
+        </scroll-view>
+      </view>
+    </view>
+
+    <modal wx:if="{{showModal}}">
+      <view class="modal-content">
+        <view class="content-exchang">
+          <view class="btn-content">
+            <view class="text">
+              <view>分享任意一款商品给新用户或者分享商城邀请好友完成注册,即可获赠500狐币</view>
+            </view>
+          </view>
+          <view class="btn-bottom">
+            <button @tap="cancelHiddModal()">取消</button>
+            <button @tap="invite()">
+              立即邀请
+            </button>
+          </view>
+        </view>
+      </view>
+      <!--      <view slot="first">具名插槽</view>-->
+      <view slot="button-right">这块内容可以显示在子组件的slot name为button-right</view>
+    </modal>
+  </view>
+
+</template>
+
+<script>
+import wepy from 'wepy';
+import miniPro from '../../../utils/wepy-pro'
+import { apiSignInF,apiGetSignInfoF,apiExchangF,apiGetpointsRecordF,apiGetSendPointF } from '../../../services/memberIntegral';
+import { apiInfoF } from '../../../services/cart'
+import { apiPasePhoneF } from '../../../services/login/index'
+import modal from '@/components/modal/index'
+export default class MemberIntegralSignIn extends wepy.page {
+  config = {
+    navigationBarTitleText: '狐币签到',
+    navigationBarBackgroundColor:'#FF7913'
+  };
+  components = {
+    modal: modal
+  };
+  data = {
+    height:wx.getSystemInfoSync().screenHeight,
+    showModal:false,
+    Info:{
+      integration:"",//可用狐币
+      cumulativeTimes:"",
+      signToday:"" //今天是否签到 true\false
+    },
+    phone:"",
+    sessionKey:"",
+    dateArr: [],
+    IconArr:[],
+    heardContent:[
+      {typeDesc:"狐币兑换"},
+      {typeDesc:"兑换有奖"},
+      {typeDesc:"商品狐币"}
+    ],
+
+    currentIndex: 0,
+    hasMore: false,
+    pageParams: {
+      offset: 0,
+      limit: 10,
+      hasMore:false,
+      page: 0,
+    },
+    pointsArr:[],
+    SendPoint:{}
+  };
+  methods = {
+    goMingxi(){
+      wepy.navigateTo({ url: `/pages/packageMine/withdrawalsRecord/index`})
+    },
+    goShareLink(){
+      this.showModal = true
+      this.$apply()
+    },
+    goBuyLink(){ //跳转到商品分类页
+      miniPro.showToast("购买任一商品即可获赠狐币哦，正在跳转...")
+      setTimeout(() => {
+        wepy.switchTab({ url: `/pages/classify/index`})
+      },3000)
+    },
+    goShareGoodLink(){
+      miniPro.showToast("分享任一商品即可获赠狐币哦，正在跳转...")
+      setTimeout(() => {
+        wepy.switchTab({ url: `/pages/classify/index`})
+      },3000)
+    },
+    goOrderComment(){ //跳转到待评价订单列表页
+      miniPro.showToast("评价已购订单商品即可获赠狐币哦，正在跳转...")
+      setTimeout(() => {
+        wepy.navigateTo({ url: `/pages/packageMine/order/index?current=4` });
+      },3000)
+    },
+    cancelHiddModal(){
+      this.showModal = false
+    },
+    invite(){ //跳转到商品分类页
+      setTimeout(() => {
+        wepy.switchTab({ url: `/pages/mine/index`})
+      },1500)
+    },
+    toTaleDetailA(taleId) {
+      wepy.navigateTo({ url: `/pages/packageRecom/taleDetail/index?taleId=${taleId}` });
+    },
+    SignIn(){
+      this.apiSignIn(this.apiSignIn.bind(this))
+    },
+    exchange(type){
+      miniPro.showConfirm({
+        title: '提示',
+        content: '确定兑换该商品吗？',
+        callback(flag) {
+          if (!flag) return
+          let param = {
+            "vipType" : type
+          }
+          apiExchangF(param).then(msg => {
+            miniPro.showToast('兑换成功')
+            setTimeout(() => {
+              wepy.switchTab({ url: `/pages/mine/index` })
+            }, 1800)
+          }).catch(() => {
+          })
+        }
+      })
+    },
+    loadMore() { // 加载更多
+      if (!this.pageParams.hasMore) return
+      let offset = this.pageParams.offset;
+      if(offset == 0){
+        offset = this.pageParams.limit;
+      }else{
+        offset = offset + this.pageParams.limit;
+      }
+      this.pageParams.offset = offset;
+      this.GetpointsRecordF(this.GetpointsRecordF.bind(this))
+    },
+  };
+  events = {
+    'showModal': (value) => {
+      console.log(value)
+      this.showModal = value
+      this.$apply()
+    },
+  }
+  async apiGetInfoFA(fun) { //获取用户信息 查询手机号
+    let _self = this
+    await apiInfoF(fun).then(msg => {
+      _self.phone = msg.phone
+      _self.sessionKey = msg.sessionKey
+      console.log("打印手机号apiGetInfoFA")
+      this.$apply();
+    }).catch(() => { });
+  }
+  apiSignIn(fun) {
+    apiSignInF(fun).then(msg => {
+      miniPro.showToast('签到成功')
+      setTimeout(() => {
+        this.Info = ''
+        this.IconArr = []
+        this.dateArr = []
+        this.GetSignInfoF(this.GetSignInfoF.bind(this))
+        this.pageParams.limit = 10
+        this.pageParams.offset = 0
+        this.pointsArr = []
+        this.GetpointsRecordF(this.GetpointsRecordF.bind(this))
+      },1500)
+    }).catch(() => {
+    })
+  };
+  GetpointsRecordF(fun){ //获取狐币流水记录
+    let params = {
+      limit: this.pageParams.limit,
+      offset: this.pageParams.offset
+    }
+    apiGetpointsRecordF(params,fun).then(msg => {
+      let { rows, last,pageNumber } = msg
+      this.pageParams.page = pageNumber
+      this.pageParams.hasMore = !last
+      this.pointsArr = this.pointsArr.concat(rows)
+      this.$apply()
+    }).catch(() => {})
+  };
+  async GetSignInfoF(){ //获取签到信息
+    await apiGetSignInfoF().then(msg => {
+      this.signToday = msg.signToday
+      this.Info = msg
+      this.IconArr = msg.signCycleIntegrationMap
+      this.dateArr = this.IconArr
+      this.$apply();
+    }).catch(() => {})
+  };
+  async GetSendPointF(){ //获取每个活动渠道赠送多少狐币
+    await apiGetSendPointF().then(msg => {
+      console.log(msg);
+      this.SendPoint = msg
+      this.$apply();
+    }).catch(() => {})
+  };
+  getPhoneNumber(e) {
+    if (e.detail.errMsg == 'getPhoneNumber:fail user deny' || e.detail.errMsg == 'getPhoneNumber:fail:user deny') {  //拒绝授权
+      miniPro.showToast("拒绝绑定手机号无法赠送狐币，请重新点击绑定！")
+    }else{
+      let that = this;
+      let iv = e.detail.iv;
+      let encryptedData = e.detail.encryptedData;
+      let signature = this.$parent.globalData.userInfo.signature;
+      let rawData = this.$parent.globalData.userInfo.rawData;
+      let sessionKey = this.sessionKey
+      let param = {
+        signature:signature,
+        rawData:rawData,
+        encryptedData:encryptedData,
+        iv:iv,
+        sessionKey:sessionKey
+      }
+      apiPasePhoneF({ miniprogramParam: JSON.stringify(param) }).then(res => {
+        miniPro.showToast("绑定手机号成功，已获赠100狐币")
+        setTimeout(() => {
+          this.GetSignInfoF(this.GetSignInfoF.bind(this))
+          this.apiGetInfoFA(this.apiGetInfoFA.bind(this)) //获取用户信息 查询phone
+        },2000)
+      }).catch(err => {
+      })
+
+    }
+
+  }
+  watch = { //监听数据改变
+    phone(val){
+      console.log(val)
+      this.phone = val
+    }
+  }
+  async onLoad(){
+    this.GetpointsRecordF(this.GetpointsRecordF.bind(this))
+    await this.GetSignInfoF(this.GetSignInfoF.bind(this))
+    await this.GetSendPointF(this.GetSendPointF.bind(this))
+    await this.apiGetInfoFA(this.apiGetInfoFA.bind(this))
+
+  }
+}
+</script>
+<style lang="scss">
+@import 'index';
+</style>

@@ -1,0 +1,153 @@
+
+<template>
+  <view class="Appointment-ctner">
+    <view class="a-1">
+      <view>取件信息：</view>
+      <block wx:if="{{!addressList.name}}">
+        <view class="icx-btn-whiteBg-colorText" @tap="donateAddress">
+          添加
+        </view>
+      </block>
+      <block  wx:else>
+        <view class="namePhone">
+          <text style="margin-right: 10rpx">{{addressList.name}} </text>
+          <text>{{ addressList.phone}}</text>
+          <text class="select" @tap="selectAddressList">选择</text>
+        </view>
+        <view class="address">{{addressList.province}}{{addressList.city}}{{addressList.district}}</view>
+        <view class="address">{{addressList.address}}</view>
+      </block>
+
+    </view>
+    <view class="a-2">
+      <view>回收信息</view>
+      <view class="text-input">
+        <text>书籍数量：</text>
+        <input type="text" class="input" placeholder="请输入数量，不少于5本" @input="inputNum">
+      </view>
+      <view class="text-input input">
+        <text>收书时间：</text>
+        <input type="time" class="input" placeholder="请选择时间 >" @input="inputTime">
+      </view>
+      <view class="text-input">
+        <text>留言：</text>
+        <text>（选填）</text>
+        <input type="text">
+      </view>
+      <view class="rule" @tap="toggleCheck_read">
+        <image wx:if="{{check_read}}" src='/images/selected.png'/>
+        <image wx:else src='/images/uncheck.png'/>
+        <view catchtap="toUserRule">
+          <text>同意接受</text>
+          <text>《狐狸回收规则》</text>
+          <text>并且确认可支配、合法的物品</text>
+        </view>
+      </view>
+    </view>
+    <view class="a-3">
+      <view>预约须知</view>
+      <view>
+        1、无效图书判定如下:无图书ISBN码、疑似盗版、书本破损
+        明显、非法出版物、严重涂改、污垢明显、包含宗教内容、
+        包含不健康内容、影响二次阅读的书，以及高中及以下的教材、试卷等为无效书籍(除此之外，其他书籍均为有效图书)
+      </view>
+      <view>2、验收说明:狐狸会对回收书籍进行人工验收，不合格的书籍不会，上架到平台，会进行环保处理。</view>
+      <view>3、审核不通过的书籍我们会用作环保循环同时根据您的无效</view>
+    </view>
+    <view class="a-bottom">
+      <view><image src="/images/kefu.png"></image></view>
+      <view class="icx-btn-colorBg-whiteText {{classActive?'activeClass':''}}" @tap="submit">提交订单</view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy';
+  import miniPro from '@/utils/wepy-pro.js';
+  import { apiAddressFindAllF } from '../../../services/mine';
+  import Validate from '../../../services/Validate'
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarTitleText: '预约捐书',
+    };
+
+    data = {
+      addressList:{},
+      check_read:false,
+      classActive:false,
+      inputParam:{
+        valueNum:"",
+        valueTime:"",
+      }
+    };
+
+    methods = {
+      donateAddress(){
+        console.log("发文飞娃儿")
+        wepy.navigateTo({ url: `/pages/packageClassify/donateAddress/index`});
+      },
+      toggleCheck_read(){
+        this.check_read = !this.check_read
+        if(this.check_read){
+          this.classActive = true
+        }else{
+          this.classActive = false
+        }
+      },
+      selectAddressList(){
+        wepy.navigateTo({ url: `/pages/packageMine/addressList/index` })
+      },
+      toUserRule(){
+        // wepy.navigateTo({ url: `/pages/packageMine/serveAgreement/index` })
+      },
+      inputNum(e) {
+        let value = e.detail.value;
+        this.inputParam.valueNum = value
+      },
+      inputTime(e) {
+        let valueTime = e.detail.value;
+        this.inputParam.valueTime = valueTime
+      },
+      submit(){
+        let valueNum = this.inputParam.valueNum;
+        let valueTime = this.inputParam.valueTime;
+        let vArr = [
+          //验证方法：
+          //这里的第一个对象valueNum必须名称相同。对应上面inputParam对象里面的valueNum
+          ['valueNum', valueNum, '书籍数量', 'empty'],
+          ['valueTime', valueTime, '收书时间', 'empty']
+        ];
+        if (!Validate(vArr)) {
+          return;
+        }
+        if(valueNum < 5){
+          miniPro.showToast("书籍数量不能少于5本")
+          return;
+        }
+        if(!this.check_read){
+          miniPro.showToast("请先阅读勾选回收规则条例")
+          return;
+        }
+
+        wepy.navigateTo({ url: `/pages/packageClassify/appointmentSuccess/index` })
+      }
+    };
+    apiAddressFindAllA(fun) {
+      apiAddressFindAllF(fun).then((result) => {
+        // this.addressList = result.map(val => {
+        //   val.isChecked = val.def == 1 ? true : false
+        //   return val
+        // })
+        this.addressList = result[0]
+        console.log(result[0])
+        this.$apply()
+      }).catch(() => { });
+    }
+    onLoad() {
+      this.apiAddressFindAllA(this.apiAddressFindAllA.bind(this))
+    }
+  }
+</script>
+<style lang="scss">
+  @import './index.scss';
+</style>

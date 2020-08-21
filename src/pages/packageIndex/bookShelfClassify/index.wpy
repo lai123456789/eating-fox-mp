@@ -1,0 +1,267 @@
+
+<template>
+  <view class="search-ctner container-same">
+    <view class="search-top-outer">
+
+      <view class="search-rank-index">
+        <view class="search-rank-outer"> <!---->
+          <view class="text-content">
+            <view class="rank-same active">综合</view>
+            <view class="icon"></view>
+          </view>
+          <view>借阅人数</view>
+          <view class="text-content" @tap="filter">
+            <view class="rank-same active-1">筛选</view>
+            <image src="/images/btn_shaixuan.png" class="icon-img"></image>
+          </view>
+        </view>
+        <view class="search-no-text"  wx:if="{{pageList.length == 0 && pageList}}">
+          <image src="../../../images/warn.png"></image>
+          <text>抱歉，没找到相关书籍，为您推荐以下相关书籍</text>
+        </view>
+      </view>
+    </view>
+    <view class="ix-goods-wrap"> <!---->
+      <scroll-view scroll-y="true" style="height: 100%;" @scrolltolower="loadMore">
+        <view class="cart-like">
+          <view class='cat-container' wx:if="{{pageList.length > 0}}">
+            <view @tap="toGoodsDetail({{item}})" class="cat-like-item"
+                  wx:for="{{pageList}}" wx:key="index">
+              <image src="{{item.goodsIco}}"></image>
+              <view class="cart-l-des">{{item.goodsName}}</view>
+              <view class="cart-l-label"> <!--￥{{item.price}}-->
+                <view class="icx-btn-colorBg-whiteText">0-5岁</view>
+                <view class="icx-btn-colorBg-whiteText">教育</view>
+                <view class="icx-btn-colorBg-whiteText">中文</view>
+              </view>
+            </view>
+          </view>
+        </view>
+
+      </scroll-view>
+
+    </view>
+  </view>
+  <van-popup
+    show="{{ show }}"  custom-style="height:100%;width:54%"
+    bind:close="onClose"
+    position="right">
+    <view class="popup-content">
+      <view class="popup-item">
+        <view class="p-1">年龄（单选）</view>
+        <view class="p-2">
+          <view class="icx-btn-colorBg-whiteText">
+            <text>0-5岁</text>
+            <text>+</text>
+          </view>
+          <view class="icx-btn-colorBg-whiteText">
+            <text>5-10岁</text>
+            <text>+</text>
+          </view>
+          <view class="icx-btn-colorBg-whiteText">
+            <text>11-12岁</text>
+            <text>+</text>
+          </view>
+        </view>
+      </view>
+      <view class="popup-item">
+        <view class="p-1">语言（单选）</view>
+        <view class="p-2">
+          <view class="icx-btn-colorBg-whiteText">
+            <text>中文</text>
+            <text>+</text>
+          </view>
+          <view class="icx-btn-colorBg-whiteText">
+            <text>英文</text>
+            <text>+</text>
+          </view>
+          <view class="icx-btn-colorBg-whiteText">
+            <text>中英文</text>
+            <text>+</text>
+          </view>
+        </view>
+      </view>
+      <view class="popup-bottom">
+        <view class="icx-btn-whiteBg-colorText">重置</view>
+        <view class="icx-btn-colorBg-whiteText">确定</view>
+      </view>
+    </view>
+  </van-popup>
+</template>
+
+<script>
+  import wepy from 'wepy';
+  import Auth from '../../../common/js/authProcess.js';
+  import {
+    apiGoodsListF,
+    apiGetGoodsDetailsF
+  } from '../../../services/index';
+  import {
+    apiCollectDeleteF,
+    apiCollectSaveF
+  } from '../../../services/mine';
+
+  import miniPro from '@/utils/wepy-pro.js';
+  import { showAlertTips } from '@/utils/feature.js';
+  import SearchItem from '@/components/searchItem/index';
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarTitleText: '图书分类',
+      "usingComponents": {
+        "van-popup": "/components/vant/popup/index",
+      }
+    };
+    components = {
+      SearchItem: SearchItem
+    };
+
+    mixins = [];
+
+    data = {
+      show:false,
+      pageList: [],
+      starFData: {
+        goodsId: '',
+        current: ''
+      },
+      pageParams: {
+        page: 0,
+        limit: 7,
+        categoryId: '',
+        keyword: '',
+        hasMore:false,
+        goodsLabels:''
+      },
+      labelList:[
+        {labelText:"成长经历"},
+        {labelText:"童话"},
+        {labelText:"白雪公主"}
+      ],
+      buttonCurrentIndex: 0,
+      buttonList:[
+        {buttonText:"全部"},
+        {buttonText:"0-3岁"},
+        {buttonText:"3-6岁"},
+        {buttonText:"6-9岁"},
+        {buttonText:"10-15岁"}
+      ]
+    };
+
+    computed = {};
+
+    methods = {
+      filter(){
+        this.show = true
+      },
+      onClose(){
+        this.show = false
+      },
+      clickButton(item, index){
+        // if (this.currentIndex == index) return
+        this.buttonCurrentIndex = index
+      },
+      toGoodsDetail(e){
+        miniPro.toGoodsDetail(e.id)
+      },
+      toSearchA() {
+        this.pageParams.page = 0
+        this.pageList = []
+        this.getGoodsListA(this.getGoodsListA.bind(this))
+      },
+      labelSearchA(e){
+        this.pageParams.keyword = e.labelText
+        this.pageParams.page = 0
+        this.pageList = []
+        this.getGoodsListA(this.getGoodsListA.bind(this))
+      },
+      toCloseWordA() {
+      },
+
+      confirmTap(e){ //手机键盘 输入法右下角搜索按钮
+        this.pageParams.keyword = e.detail.value
+        this.pageParams.page = 0
+        this.pageList = []
+        this.getGoodsListA(this.getGoodsListA.bind(this))
+      },
+
+      loadMore() { // 加载更多
+        if (!this.pageParams.hasMore) return
+        this.pageParams.page += 1
+        this.getGoodsListA(this.getGoodsListA.bind(this))
+      }
+    }
+
+    getGoodsListA(fun) {
+      apiGoodsListF({
+        page: this.pageParams.page,
+        limit: this.pageParams.limit,
+        keyword: '',
+        categoryId: this.pageParams.categoryId,
+        goodsLabels:this.pageParams.goodsLabels
+      }, fun).then(result => {
+        let { rows, last, pageNumber } = result
+        this.pageParams.page = pageNumber
+        this.pageParams.hasMore = !last
+        this.pageList = this.pageList.concat(rows)
+        this.$apply()
+      }).catch(err => {
+      });
+    }
+
+    apiCollectSaveA(fun) {
+      apiCollectSaveF({
+        goodsId: this.starFData.goodsId
+      }, fun).then(msg => {
+        this.pageList[this.starFData.current].collection = true
+        miniPro.showToast('收藏成功')
+        this.$apply()
+      }).catch(err => {
+        miniPro.showToast('收藏失败')
+      })
+    }
+
+    apiCollectDeleteA(fun) {
+      apiCollectDeleteF(this.starFData.goodsId, fun).then(msg => {
+        this.pageList[this.starFData.current].collection = false
+        this.$apply()
+      }).catch(err => {
+        miniPro.showToast('删除收藏失败')
+      })
+    }
+
+    events = {
+      'goods-start-event': (current, collection) => {
+        this.starFData.goodsId = this.pageList[current].id
+        this.starFData.current = current
+        this.$apply()
+        setTimeout(() => {
+          if (collection) {
+            this.apiCollectDeleteA(this.apiCollectDeleteA.bind(this))
+          } else {
+            this.apiCollectSaveA(this.apiCollectSaveA.bind(this))
+          }
+        }, 10);
+      },
+      'to-goods-event': (goodsId, groupPurchase) => {
+        let _goodsId = goodsId
+        let _group = groupPurchase
+        miniPro.toGoodsDetail(_goodsId, _group)
+      }
+    };
+
+    async onLoad(option) {
+      this.pageParams.categoryId = option.categoryId || ""
+      this.pageParams.goodsLabels = option.goodsLabels || ""
+      this.getGoodsListA(this.getGoodsListA.bind(this))
+
+      this.$apply();
+    }
+    onUnload() {}
+    onHide() {}
+    async onShow() {}
+  }
+</script>
+<style lang="scss">
+  @import './index.scss';
+</style>

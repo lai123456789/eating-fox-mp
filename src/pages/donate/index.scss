@@ -1,0 +1,49 @@
+@import '../../common/css/rpx.scss';
+@import '../../common/css/const.scss';
+@import '../../common/css/mixin.scss';
+page,
+.donate-ctner{
+  .text{
+    margin: rpx(40) rpx(30);
+    font-size:rpx(40);
+    font-family:PingFang SC;
+    font-weight:800;
+    line-height:rpx(60);
+    color:rgba(51,51,51,1);
+  }
+  .content-item{
+    margin: rpx(40) rpx(30);
+    display: flex;
+    align-items: center;
+    .c1{
+      border-radius: rpx(10);
+      margin-right: rpx(35);
+      width: rpx(310);
+      height: rpx(178);
+      background: #999999;
+    }
+    .c2{
+      view{
+        line-height: rpx(50);
+      }
+      view:nth-child(1){
+        font:{
+          size: rpx(30);
+        }
+        color: #333333;
+      }
+      view:nth-child(2){
+        font:{
+          size: rpx(24);
+        }
+        color: #999999;
+      }
+    }
+  }
+  .icx-btn-colorBg-whiteText{
+    width: rpx(690);
+    height: rpx(80);
+    margin:0 auto;
+    border-radius: rpx(45);
+  }
+}

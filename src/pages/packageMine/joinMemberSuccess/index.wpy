@@ -1,0 +1,45 @@
+<template>
+  <view class='pay-success-ctner'>
+    <view class="suc-top">
+      <view class="top-d">
+        <image src='/images/joinMemberSuccess.png'></image>
+      </view>
+      <view class="top-b">
+        恭喜您成为狐狸会员！
+      </view>
+      <view class="top-c">您可以获取1000狐币</view>
+    </view>
+    <view class="pat-btn-wrap">
+      <button class="icx-btn-same-cancel" @tap='lookMember'>查看会员</button>
+      <button class="icx-btn-same-cancel" @tap='checkOrderA'>书包购买</button>
+    </view>
+  </view>
+
+</template>
+
+<script>
+import wepy from 'wepy'
+export default class PaySuccess extends wepy.page {
+  config = {
+    navigationBarTitleText: '开通会员提示'
+  };
+  components = {
+  };
+  data = {
+  };
+  methods = {
+    lookMember() {
+      wepy.navigateTo({ url: `/pages/packageMine/lookMembers/index` })
+    },
+    checkOrderA() {
+      wepy.redirectTo({ url: `/pages/packageMine/order/index?current=0` });
+    }
+  };
+  onLoad() {
+
+  }
+}
+</script>
+<style lang="scss" scoped>
+@import './index'
+</style>

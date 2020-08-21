@@ -1,0 +1,96 @@
+<template>
+  <view class='msg-ctner'>
+    <view class="msg-top">
+      <view class="msg-1">
+        <view class="one">
+          <image src="/images/icon_daiqu.png"></image>
+          <text>代取书</text>
+        </view>
+        <view class="two">
+          获得奖励：100狐币
+        </view>
+      </view>
+    </view>
+    <view class="msg-text">
+      <view>订单号：1231251355876</view>
+      <view>发件人：狐狸</view>
+      <view>预约数量：6本</view>
+      <view>收书时间：2020-7-27</view>
+      <view>预约号码：15023651445</view>
+      <view>取件地址：广东省深圳市南山区</view>
+    </view>
+    <view class="icx-btn-whiteBg-colorText" @tap="cancel">取消订单</view>
+  </view>
+
+  <van-popup
+    show="{{ show }}" round position="bottom" custom-style="height: 45%">
+    <view class="popup-content">
+      <view class="p1">选择取消的原因</view>
+      <view class="List">
+        <view class="item" wx:for="{{radioList}}" @tap="onClick({{item}},{{index}})">
+          <view>{{item.title}}</view>
+          <image wx:if="{{currentIndex == index}}" src='/images/selected.png'/>
+          <image wx:else src='/images/uncheck.png'/>
+        </view>
+
+      </view>
+      <view class="btn">
+        <view class="icx-btn-whiteBg-colorText" @tap="noCancel">暂不取消</view>
+        <view class="icx-btn-whiteBg-colorText" @tap="sureCancel">确定取消</view>
+      </view>
+
+    </view>
+  </van-popup>
+</template>
+
+<script>
+import wepy from 'wepy'
+export default class appointmentSuccess extends wepy.page {
+  config = {
+    navigationBarBackgroundColor:'#FF7913',
+    navigationBarTextStyle:'white',
+    navigationBarTitleText: '捐书-订单详情',
+    "usingComponents": {
+      "van-popup": "/components/vant/popup/index",
+    }
+  };
+  components = {
+  };
+  data = {
+    show:false,
+    radio: "0",
+    currentIndex:0,
+    radioList:[
+      {title:"信息填写有误",check:false,index:0},
+      {title:"随便试试",check:false,index:1},
+      {title:"其他原因",check:false,index:2},
+      {title:"不想捐了",check:false,index:3}
+    ]
+  };
+  methods = {
+    goIndex(){
+      wepy.switchTab({url:`/pages/index/index`})
+    },
+    cancel(){
+      this.show = true
+    },
+    noCancel(){
+      this.show = false
+    },
+    onClick(e,index){
+      this.currentIndex = index
+      // this.check = e.check
+    },
+    sureCancel(){
+      let val = this.currentIndex
+      console.log(val)
+    }
+  }
+
+
+}
+</script>
+<style lang="scss" scoped>
+@import './index'
+</style>
+

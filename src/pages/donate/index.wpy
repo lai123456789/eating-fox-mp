@@ -1,0 +1,68 @@
+
+<template>
+  <view class="donate-ctner">
+      <view class="text">捐书流程</view>
+    <view class="content-item">
+      <view class="c1"></view>
+      <view class="c2">
+        <view>预约捐书</view>
+        <view>5本起捐，捐书规则 ></view>
+      </view>
+    </view>
+    <view class="content-item">
+      <view class="c1"></view>
+      <view class="c2">
+        <view>快递免费上门收书</view>
+        <view>快递免费取件</view>
+      </view>
+    </view>
+    <view class="content-item">
+      <view class="c1"></view>
+      <view class="c2">
+        <view>平台验收</view>
+        <view>有效无效书籍判定</view>
+      </view>
+    </view>
+    <view class="content-item">
+      <view class="c1"></view>
+      <view class="c2">
+        <view>获得奖励</view>
+        <view>奖励规则 ></view>
+      </view>
+    </view>
+    <view class="icx-btn-colorBg-whiteText" @tap="bookAppointment">预约捐书</view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import '../../common/js/authProcess.js';
+import miniPro from '@/utils/wepy-pro.js';
+import {
+  apiCategoryByParentF,
+  apiCategoryGetBannerF
+} from '../../services/classify/index'
+// import miniPro from '@/utils/wepy-pro.js';
+
+export default class donate extends wepy.page {
+  config = {
+    navigationBarTitleText: '捐书',
+    // navigationStyle:'custom'
+  };
+
+  data = {
+
+  };
+
+  methods = {
+    bookAppointment(){
+      wepy.navigateTo({ url: `/pages/packageClassify/appointmentBook/index`});
+    }
+  };
+  async onLoad(){
+  }
+}
+</script>
+<style lang="scss">
+@import './index.scss';
+</style>

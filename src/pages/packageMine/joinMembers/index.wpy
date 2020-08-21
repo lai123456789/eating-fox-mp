@@ -1,0 +1,196 @@
+<template>
+  <view class='member-ctner'>
+    <block wx:if="{{isActive == 1}}">
+      <view class="top yearCard">
+        <view class="t1">
+          <view>狐狸年卡</view>
+          <view>每天仅要1.64元</view>
+        </view>
+        <view class="t2">
+          <view>365天</view>
+          <view>会员期</view>
+        </view>
+      </view>
+    </block>
+    <block wx:if="{{isActive == 2}}">
+      <view class="top  tiyanCard">
+        <view class="t1 t1-tiyan">
+          <view>狐狸体验卡</view>
+          <view>每天仅要0.65元</view>
+        </view>
+        <view class="t2 t2-tiyan">
+          <view>90天</view>
+          <view>会员期</view>
+        </view>
+      </view>
+    </block>
+    <view class="center">
+      <view class="c1 {{isActive == '1' ? 'activeMember' : ''}}"  @tap="choiceA('1')">
+        <view class="c-one">
+          <view>狐狸年卡</view>
+          <view>¥599</view>
+        </view>
+        <view class="c-one">
+          <view>
+            <text>借阅包邮</text>
+            <text>|</text>
+            <text>每次1-10本</text>
+            <text>|</text>
+            <text>无限次</text>
+          </view>
+          <view>
+            <text>原价</text>
+            <text>¥</text>
+            <text>599</text>
+          </view>
+        </view>
+      </view>
+      <view class="c1 {{isActive == '2' ? 'activeMember' : ''}}"  @tap="choiceA('2')">
+        <view class="c-one">
+          <view>狐狸体验卡</view>
+          <view>¥59</view>
+        </view>
+        <view class="c-one">
+          <view>
+            <text>借阅包邮</text>
+            <text>|</text>
+            <text>每次1-10本</text>
+            <text>|</text>
+            <text>3次</text>
+          </view>
+          <view>
+            <text>原价</text>
+            <text>¥</text>
+            <text>159</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="result-text" wx:if="{{isActive == 1}}">
+      <view>权益说明:</view>
+      <view>借阅无限次</view>
+      <view>会员有效期为365天</view>
+      <view>运费:借书免运费、还书只有35次免运费，请合理使用</view>
+    </view>
+    <view class="result-text" wx:if="{{isActive == 2}}">
+      <view>权益说明:</view>
+      <view>借阅3次</view>
+      <view>会员有效期为90天</view>
+      <view>运费:借书免运费，请合理使用</view>
+    </view>
+    <view class="bottom">
+      <view class="left">
+        <view>
+          <view class="f1">
+            <text>实付金额: </text>
+            <text wx:if="{{isActive == 1}}">¥799</text>
+            <text wx:if="{{isActive == 2}}">¥259</text>
+          </view>
+          <view class="f2">
+            <text>押金可退: </text>
+            <text>¥200</text>
+          </view>
+        </view>
+      </view>
+      <view class="icx-btn-colorBg-whiteText" @tap="openSure">
+        立即开通
+      </view>
+    </view>
+  </view>
+
+
+</template>
+
+<script>
+import wepy from 'wepy'
+import {
+  apiVipFinanceConfigF,
+  apiVipPayF
+} from '../../../services/mine/index'
+import { apiExchangF } from '../../../services/memberIntegral';
+import miniPro from '../../../utils/wepy-pro'
+export default class JoinMembers extends wepy.page {
+  config = {
+    navigationBarTitleText: '加入会员'
+  };
+  components = {
+  };
+  data = {
+    isActive: '1',//体验卡或者年卡
+    pageObj: {}
+  };
+  methods = {
+    choiceA(f) { //选择体验卡or年卡
+      if (this.isActive == f) return;
+      this.isActive = f
+    },
+    openSure(){
+      wepy.navigateTo({ url: '/pages/packageMine/payMembers/index' });
+    },
+    choiceB(Q) { //选择购买方式
+      if (this.exActive == Q) return;
+      this.exActive = Q
+    },
+    paySure(){
+      if(this.isActive == "1" && this.exActive == "1"){
+        console.log("月卡 积分付款")
+        this.apiVipPayExF(this.apiVipPayExF.bind(this))
+      }else if(this.isActive == "1" && this.exActive == "2"){
+        console.log("月卡 现金付款")
+        this.apiVipPayFA(this.apiVipPayFA.bind(this))
+      }else if(this.isActive == "2" && this.exActive == "1"){
+        console.log("年卡 积分付款")
+        this.exActive = 2
+        this.apiVipPayExF(this.apiVipPayExF.bind(this))
+      }else if(this.isActive == "2" && this.exActive == "2"){
+        console.log("年卡 现金付款")
+        this.apiVipPayFA(this.apiVipPayFA.bind(this))
+      }
+    },
+    hideModal(){
+      this.showModal = false
+    },
+    toDocA() {
+      wepy.navigateTo({ url: '/pages/packageMine/memberDocument/index' });
+    }
+  }
+  apiVipFinanceConfigFA(fun) {
+    apiVipFinanceConfigF(fun).then((result) => {
+      this.pageObj = result
+      this.$apply()
+    }).catch(() => { });
+  }
+  apiVipPayExF(fun){ //积分兑换
+    let param = {
+      "vipType" : this.exActive
+    }
+    apiExchangF(param).then(msg => {
+      miniPro.showToast('换购成功')
+      setTimeout(() => {
+        wepy.switchTab({ url: `/pages/mine/index` })
+      }, 1500)
+    }).catch(() => {
+    })
+  }
+  apiVipPayFA(fun) { //现金购买
+    apiVipPayF({
+      vipType: this.isActive
+    }, fun).then((result) => {
+      miniPro.requestPayment(result).then((result) => {
+        miniPro.showToast('支付成功')
+        setTimeout(() => {
+          wepy.switchTab({ url: `/pages/mine/index` })
+        }, 1500)
+      }).catch(() => {
+        miniPro.showToast('支付失败')
+      });
+    }).catch(() => {   });
+  }
+  onLoad() {
+    this.apiVipFinanceConfigFA(this.apiVipFinanceConfigFA.bind(this))
+  }
+}
+</script>
+<style lang="scss" scoped>
+@import './index'
+</style>

@@ -1,0 +1,126 @@
+@import '../../../common/css/rpx.scss';
+@import '../../../common/css/const.scss';
+@import '../../../common/css/mixin.scss';
+page,
+.classify-ctner{
+    height: 100%;
+    position: relative;
+    .ix-input-wrap{
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      padding: rpx(12) 0 rpx(12) rpx(40);
+        //@include borderBottomOnePx;
+        display: flex;
+        .input-search{
+            width: rpx(46);
+            padding-left: rpx(16);
+            border-top-left-radius: rpx(30);
+            border-bottom-left-radius: rpx(30);
+            background: #F6F6F6;
+            display: flex;
+            align-items: center;
+            image {
+                width: rpx(25);
+                height: rpx(26);
+            }
+        }
+        input {
+            flex: 6;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        .input-msg {
+            width: rpx(28);
+            display: flex;
+            align-items: center;
+            margin-left: rpx(18);
+          flex: 1;
+            image {
+                width: rpx(27);
+                height: rpx(25);
+            }
+        }
+    }
+
+    .cs-scroll-outer{
+        height: 100%;
+        padding-top: rpx(40);
+    }
+    .cs-scroll-inner{
+        width: 100%;
+        height: 100%;
+        display: flex;
+
+        .cs-left{
+            width: rpx(220);
+            position: relative;
+            //@include borderRightOnePx;
+            text-align: center;
+
+          padding: rpx(34);
+          scroll-view{
+            background: #EEEEEE;
+          }
+          ::-webkit-scrollbar { //隐藏滚动条的默认样式
+            width: 0;
+            height: 0;
+            color: transparent;
+          }
+
+            .cs-left-item {
+              white-space: nowrap;
+              width: 100%;
+              height: rpx(100);
+
+
+              display: flex;
+              align-items: center;
+              justify-content: center;
+                //width: rpx(130);
+                //margin: rpx(30);
+                font-size: $size-one;
+                line-height: 1.4;
+            }
+            .cs-left-item-active {
+                background: #FFF;
+                color: #333333;
+              border-left: rpx(5) solid $color-word-alarm;
+
+            }
+        }
+        .cs-right {
+            flex: 1;
+          margin-top: rpx(20);
+            .right-con-outer {
+              padding: rpx(16) rpx(50) rpx(16) rpx(16);
+            }
+            .right-list {
+                overflow: hidden;
+              display: flex;
+              flex-flow: row wrap;
+              width: 100%;
+              .right-list-item {
+                    margin-right: 2%;
+                }
+                .right-list-item {
+                    text-align:center;
+                    width: rpx(180);
+                    margin: rpx(25);
+                    image {
+                        width: 100%;
+                        height: rpx(170);
+                        display: inline-block;
+                        margin-bottom: rpx(18);
+                    }
+                    view {
+                        line-height: 1.2;
+                        font-size: rpx(24);
+                    }
+                }
+            }
+        }
+    }
+
+}

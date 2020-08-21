@@ -1,0 +1,181 @@
+<template>
+  <view class='sure-order-ctner'>
+    <view class="sure-order-inner">
+        <view class="address-outer" @tap='toChoiceAddressA'>
+          <image src='../../../images/location_a.png'></image>
+          <view class="center-text">
+            <view>
+              <text>成家尧  </text>
+              <text>13684925515</text>
+            </view>
+            <view>{{addressStr ? addressStr : '请选择地址'}}</view>
+          </view>
+          <image src='../../../images/unfold.png'></image>
+        </view>
+        <view class="order-outer">
+          <view class="o1">
+            <view>
+              <image src="/images/bu.png"></image>
+              <image src="/images/bu.png"></image>
+              <image src="/images/bu.png"></image>
+              <image src="/images/bu.png"></image>
+              <image src="/images/bu.png"></image>
+              <image src="/images/bu.png"></image>
+              <image src="/images/bu.png"></image>
+            </view>
+            <view>共10件</view>
+          </view>
+          <view class="o2">
+            <text>借阅时间</text>
+            <text>2020-01-01至2020-02-01</text>
+          </view>
+        </view>
+      <view class="icx-btn-colorBg-whiteText icx-bottom" @tap="borrowSure">
+        确定借阅
+      </view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+import {
+  apiFindOrderDetailF,
+  apiPayCreateF,
+  apiFindDefAddressF,
+} from '../../../services/mine/index';
+import miniPro from '@/utils/wepy-pro.js';
+
+export default class SureOrder extends wepy.page {
+  config = {
+    navigationBarTitleText: '确认订单'
+  };
+  components = {
+  };
+  data = {
+    showGoodsPop: false,
+    check: true,
+    addressStr: '',
+    addressId: '',
+    payRemarksList: [],
+    cartIds:'',
+    tempEcNo:'',
+    show:true,
+  };
+  methods = {
+    borrowSure(){
+      let _self = this
+      miniPro.showConfirm({
+        title: '提示',
+        content: '你确认要借阅10本图书吗？',
+        callback(flag) {
+          if (!flag) return
+
+        }
+      })
+    },
+    submitOrderA() {
+      this.apiPayCreateA(this.apiPayCreateA.bind(this))
+    },
+    toChoiceAddressA() {
+      wepy.navigateTo({ url: `/pages/packageMine/addressList/index` })
+    },
+  };
+
+  apiFindOrderDetailA(fun) {
+    let dataBase = this.params;
+    apiFindOrderDetailF(dataBase, fun).then((result) => {
+      this.orderDetailObj = result.children
+      this.totolPrice = result.totalPrice
+      this.integration = result.integration  //本单使用多少积分
+      this.integrationAmount = result.integrationAmount //积分抵扣了多少钱
+      this.params.orderList = result.children
+      this.params.orderMasterId = result.orderMasterId
+      this.tempEcNo = result.tempEcNo
+      this.$apply()
+    }).catch(() => { });
+  }
+  apiFindDefAddressFA(fun) {
+    apiFindDefAddressF(fun).then((result) => {
+      this.addressStr = `${result.province} ${result.city} ${result.district}`
+      this.addressId = result.id
+      wepy.$instance.globalData.addressObj.addressStr = ''
+      wepy.$instance.globalData.addressObj.addressId = ''
+      this.$apply()
+    }).catch(() => { });
+  }
+  apiPayCreateA(fun) {
+    let list = this.params.orderList
+    let addressId = this.addressId
+    let orderMasterId = this.params.orderMasterId
+    let integration,balance
+    if(this.apiIntegrationNum > 0){
+      integration = this.apiIntegrationNum
+    }else{
+      integration = ""
+    }
+    if(this.apiBalance > 0){
+      balance = this.apiBalance
+    }else{
+      balance = ""
+    }
+    let tempEcNo = this.tempEcNo
+    let paramsData = {
+      //   orderList: list,  直接点立即购买进来的
+      // orderMasterId: orderMasterId,
+      addressId: addressId,
+      integration:integration, // 新增积分参数
+      deductAmount:balance,// 新增余额参数
+      tempEcNo:tempEcNo,
+      remark:this.remark,
+    }
+    apiPayCreateF(paramsData, fun).then(msg =>{
+      let data = msg
+      miniPro.requestPayment(data).then((result) => {
+        miniPro.showToast('支付成功')
+        setTimeout(() => {
+          wepy.navigateTo({ url: `/pages/packageMine/paySuccess/index` })
+        }, 1500)
+      }).catch(() => {
+        miniPro.showToast('支付失败')
+        setTimeout(() => {
+          wepy.navigateTo({ url: `/pages/packageMine/payFail/index` })
+        }, 1500)
+      });
+    }).catch(() => { });
+  }
+  events = {
+    'order-detail-input': (value, index) => {
+      let list = this.params.orderList
+      list[index].remarks = value
+      console.log(value)
+      this.$apply()
+    },
+  }
+  onLoad(option) {
+    console.log(option)
+    this.params = option;
+    console.log(option.orderMasterId)
+    this.params.orderMasterId = option.orderMasterId
+    console.log("this.params.orderMasterId",this.params.orderMasterId)
+    this.cartIds = option.cartIds
+    this.$apply()
+    setTimeout(() => {
+      this.apiFindOrderDetailA(this.apiFindOrderDetailA.bind(this))
+    }, 30);
+    this.apiFindDefAddressFA(this.apiFindDefAddressFA.bind(this))
+  }
+
+  onShow() {
+    let { addressStr, addressId } = wepy.$instance.globalData.addressObj
+
+    if (addressId) {
+      this.addressStr = addressStr
+      this.addressId = addressId
+    }
+    // this.apiFindDefAddressFA(this.apiFindDefAddressFA.bind(this))
+  }
+}
+</script>
+<style lang="scss" scoped>
+@import './index'
+</style>
